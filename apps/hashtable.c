@@ -15,54 +15,7 @@ static int cmp_ht_items(const void* a, const void* b) {
   return a_val < b_val ? 1 : -1;
 }
 
-int main() {
-  // some tests
-  HashTable* ht = ht_create(4);
-  // ht_insert(ht, "1", 10);
-  // ht_insert(ht, "2", 20);
-  // ht_insert(ht, "Hel3", 30);
-  // ht_insert(ht, "Cau4", 40);
-  // ht_print(ht);
-  // ht_insert(ht, "Cau6", 60); // grow!
-  // ht_print(ht);
-  // ht_inc(ht, "11"); // increment
-  // ht_inc(ht, "21"); // increment
-  // ht_inc(ht, "31"); // increment
-  // ht_inc(ht, "41"); // increment
-  // ht_inc(ht, "51"); // increment
-  // ht_inc(ht, "61"); // increment
-  // ht_inc(ht, "71"); // increment
-  // ht_inc(ht, "81"); // increment and grow again
-  // ht_print(ht);
-
-  // ht_print_search(ht, "1");
-  // ht_print_search(ht, "2");
-  // ht_print_search(ht, "3");
-  // ht_print_search(ht, "Hel3");
-  // ht_print_search(ht, "Cau4");
-
-  // ht_insert(ht, "Cau6", 61); // update
-  // ht_inc(ht, "1");           // increment
-  // ht_inc(ht, "Hel3");        // increment
-  // ht_inc(ht, "new");         // increment
-  // ht_print(ht);
-
-  // ht_delete(ht, "Hel3");
-  // ht_delete(ht, "Cau6");
-  // ht_delete(ht, "1");
-  // ht_print(ht);
-
-  ht_free(ht);
-  // end of tests
-
-  // shakespeare demo
-  FILE* fp = fopen("data/shakespeare.txt", "re");
-  if (!fp) {
-    perror("fopen");
-    exit(EXIT_FAILURE);
-  }
-  ht = ht_create(32 * 1024);
-
+static void parse_and_map(FILE* fp, HashTable* table) {
 #define BUFSIZE 1024
 #define WORDSIZE 50
   char  buf[BUFSIZE];
