@@ -33,13 +33,24 @@ static void parse_and_map(FILE* fp, HashTable* table) {
           exit(EXIT_FAILURE);
         }
       } else if (word_ptr > word) {
-        *word_ptr++ = '\0'; // terminate word
-        ht_inc(ht, word);   // record (takes a copy)
-        word_ptr = word;    // restart new word
+        *word_ptr++ = '\0';  // terminate word
+        ht_inc(table, word); // record (takes a copy)
+        word_ptr = word;     // restart new word
       }
       ++bufptr; // next char from buf
     }
   }
+}
+
+int main() {
+  // shakespeare demo
+  FILE* fp = fopen("data/shakespeare.txt", "re");
+  if (!fp) {
+    perror("fopen");
+    exit(EXIT_FAILURE);
+  }
+  HashTable* ht = ht_create(32 * 1024);
+  parse_and_map(fp, ht);
   fclose(fp);
 
   // build a flat view of the hashtable items
