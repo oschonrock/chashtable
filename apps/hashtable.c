@@ -56,7 +56,7 @@ int main() {
   // end of tests
 
   // shakespeare demo
-  FILE* fp = fopen("shakespeare.txt", "re");
+  FILE* fp = fopen("data/shakespeare.txt", "re");
   if (!fp) {
     perror("fopen");
     exit(EXIT_FAILURE);
