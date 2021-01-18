@@ -148,7 +148,7 @@ void ht_delete(HashTable* table, ht_key_t key) {
       *slot = item->next; // remove item from linked list
       ht_free_item(item);
       --table->itemcount;
-      if (direct_slot) --table->scount; // HashTable accounting
+      if (direct_slot && !*slot) --table->scount; // HashTable accounting
       return;
     }
     slot        = &item->next;
