@@ -16,7 +16,7 @@ set(CMAKE_C_STANDARD 11) # C11 standard
 set(CMAKE_C_FLAGS_DEBUG            -fsanitize=address,undefined)
 # set(CMAKE_C_FLAGS_RELWITHDEBINFO   -fsanitize=address,undefined) // for use with valgrind instead
 
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+add_compile_options(-Wall -Wextra -Wpedantic)# -Werror)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) 
@@ -26,8 +26,8 @@ include_directories(include)
 
 add_library(libhashtable src/hashtable.c)
 
-add_executable(hashtable  apps/hashtable.c)
-target_link_libraries(hashtable PRIVATE libhashtable)
+add_executable(topwords  apps/topwords.c)
+target_link_libraries(topwords PRIVATE libhashtable)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests) 
 

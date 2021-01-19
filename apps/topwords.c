@@ -1,8 +1,10 @@
 #include "hashtable.h"
+#include <errno.h>
+#include <limits.h>
+#include <locale.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <locale.h>
 
 static inline bool ht_is_alpha(char c) {
   return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
@@ -43,34 +45,69 @@ static void parse_and_map(FILE* fp, HashTable* table) {
   }
 }
 
-int main() {
-  // shakespeare demo
-  FILE* fp = fopen("data/shakespeare.txt", "re");
+bool parse_long(const char* str, long* val) {
+  char* end; // NOLINT
+  errno = 0;
+  *val  = strtol(str, &end, 0);
+  if (end == str || *end != '\0' || errno == ERANGE) return false;
+  return true;
+}
+
+bool parse_int(const char* str, int* val) {
+  long long_val; // NOLINT
+  bool result = parse_long(str, &long_val);
+  if (result && long_val >= INT_MIN && long_val <= INT_MAX) {
+    *val = (int)long_val;
+    return true;
+  }
+  return false;
+}
+
+static inline size_t uminl(size_t a, size_t b) { return a < b ? a : b; }
+
+int main(int argc, char** argv) {
+  char usage[50];
+  snprintf(usage, 50, "Usage: %s filename [limit]\n", argv[0]);
+  if (argc < 2) {
+    fputs(usage, stderr);
+    exit(EXIT_FAILURE);
+  }
+  FILE* fp = fopen(argv[1], "re");
   if (!fp) {
     perror("fopen");
     exit(EXIT_FAILURE);
+  }
+  long limit = 10;
+  if (argc > 2) {
+    if (!parse_long(argv[2], &limit)) {
+      fputs(usage, stderr);
+      fprintf(stderr, "Invalid `limit`: \"%s\"\n", argv[2]);
+      fclose(fp);
+      exit(EXIT_FAILURE);
+    }
   }
   HashTable* ht = ht_create(32 * 1024);
   parse_and_map(fp, ht);
   fclose(fp);
 
   // build a flat view of the hashtable items
-  HashTableItem** flatview = ht_create_flat_view(ht);
+  HashTableItem** view = ht_create_flat_view(ht);
 
   // now sort that view and print the top 10
-  qsort(flatview, ht->itemcount, sizeof(HashTableItem*), cmp_ht_items);
+  qsort(view, ht->itemcount, sizeof(HashTableItem*), cmp_ht_items);
   size_t wordcnt = 0;
-  for (size_t i = 0; i < ht->itemcount; i++) wordcnt += flatview[i]->value;
+  for (size_t i = 0; i < ht->itemcount; i++) wordcnt += view[i]->value;
 
   setlocale(LC_NUMERIC, ""); // for thousands separator
-  printf("\n%-15s %'7zu\n", "Word count", wordcnt);
-  printf("%-15s %'7zu\n\n", "Unique count", ht->itemcount);
+  printf("\n%s\n----------------------------\n", argv[1]);
+  printf("%-17s %'10zu\n", "Word count", wordcnt);
+  printf("%-17s %'10zu\n\n", "Unique count", ht->itemcount);
 
-  puts("Top 10\n-----------------------");
-  for (size_t i = 0; i < 10; i++)
-    printf("%-8s %'6d %6.2f%%\n", flatview[i]->key, flatview[i]->value,
-           100.0 * flatview[i]->value / wordcnt);
+  printf("Top %zu\n----------------------------\n", limit);
+  for (size_t i = 0; i < uminl(limit, ht->itemcount); i++)
+    printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value,
+           100.0 * view[i]->value / wordcnt);
 
-  free(flatview);
+  free(view);
   ht_free(ht);
 }

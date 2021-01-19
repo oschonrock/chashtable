@@ -167,7 +167,7 @@ void ht_delete(HashTable* table, ht_key_t key) {
 
 // Searches the key in the hashtable
 // and returns NULL ptr if it doesn't exist
-HashTableItem* ht_search(HashTable* table, ht_key_t key) {
+HashTableItem* ht_get(HashTable* table, ht_key_t key) {
   HashTableItem* item = table->slots[ht_hash(table->size, key)];
   while (item) {
     if (strcmp(item->key, key) == 0) return item;
@@ -189,16 +189,6 @@ void ht_print(HashTable* table) {
     printf("\n");
   }
   printf("-------------------\n");
-}
-
-// debug printing. customise printf format strings by key & value types
-void ht_print_search(HashTable* table, ht_key_t key) {
-  HashTableItem* val;
-  if ((val = ht_search(table, key)) == NULL) {
-    printf("Key:%s does not exist\n", key);
-    return;
-  }
-  printf("Key:%s => %d\n", key, val->value);
 }
 
 // create a flat view (array) of HashTableItem pointers for iterating and/or

@@ -25,7 +25,7 @@ void test_insert_delete(void) {
   ht_insert(ht, "aaa", 10); // @2
   TEST_ASSERT_EQUAL(1, ht->itemcount);
 
-  HashTableItem *item = ht_search(ht, "aaa");
+  HashTableItem* item = ht_get(ht, "aaa");
   TEST_ASSERT_NOT_NULL(item);
   TEST_ASSERT_EQUAL(10, item->value);
   ht_delete(ht, "aaa");
@@ -44,7 +44,7 @@ void test_insert_delete(void) {
   ht_delete(ht, "rrr");
   TEST_ASSERT_EQUAL(0, ht->itemcount);
 
-  HashTableItem *item2 = ht_search(ht, "aaa");
+  HashTableItem* item2 = ht_get(ht, "aaa");
   TEST_ASSERT_NULL(item2);
 }
 void test_inc(void) {
@@ -59,9 +59,9 @@ void test_inc(void) {
   TEST_ASSERT_EQUAL(3, ht->itemcount);
   TEST_ASSERT_EQUAL(4, ht->size);
 
-  HashTableItem *a = ht_search(ht, "aaa");
-  HashTableItem *b = ht_search(ht, "bbb");
-  HashTableItem *c = ht_search(ht, "ccc");
+  HashTableItem* a = ht_get(ht, "aaa");
+  HashTableItem* b = ht_get(ht, "bbb");
+  HashTableItem* c = ht_get(ht, "ccc");
 
   ht_inc(ht, "aaa");
   ht_inc(ht, "aaa");
