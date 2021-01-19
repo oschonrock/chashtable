@@ -18,7 +18,6 @@ typedef struct HashTable HashTable;
 struct HashTable {
   HashTableItem** slots;     // hash slots into which items are filled
   size_t          size;      // how many slots exist
-  size_t          scount;    // how many slots are used
   size_t          itemcount; // how many items exist
 };
 
