@@ -22,7 +22,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) 
 
 add_subdirectory(Unity)
-
 include_directories(include)
 
 add_library(libhashtable src/hashtable.c)
@@ -30,9 +29,8 @@ add_library(libhashtable src/hashtable.c)
 add_executable(hashtable  apps/hashtable.c)
 target_link_libraries(hashtable PRIVATE libhashtable)
 
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests) 
 
 add_executable(test_hashtable  tests/test_hashtable.c)
-target_include_directories(test_hashtable PRIVATE Unity/src)
+target_include_directories(test_hashtable PRIVATE src Unity/src)
 target_link_libraries(test_hashtable PRIVATE unity libhashtable)
