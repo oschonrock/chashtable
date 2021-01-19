@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 
 static inline bool ht_is_alpha(char c) {
   return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
@@ -59,16 +60,16 @@ int main() {
   // now sort that view and print the top 10
   qsort(flatview, ht->itemcount, sizeof(HashTableItem*), cmp_ht_items);
   size_t wordcnt = 0;
-  size_t uniqcnt = 0;
-  for (size_t i = 0; i < ht->itemcount; i++) {
-    ++uniqcnt;
-    wordcnt += flatview[i]->value;
-  }
-  printf("\nWord count: %zu\nUnique count: %zu\n\n", wordcnt, uniqcnt);
+  for (size_t i = 0; i < ht->itemcount; i++) wordcnt += flatview[i]->value;
 
-  puts("Top 10\n---------------");
+  setlocale(LC_NUMERIC, ""); // for thousands separator
+  printf("\n%-15s %'7zu\n", "Word count", wordcnt);
+  printf("%-15s %'7zu\n\n", "Unique count", ht->itemcount);
+
+  puts("Top 10\n-----------------------");
   for (size_t i = 0; i < 10; i++)
-    printf("%-8s %6d\n", flatview[i]->key, flatview[i]->value);
+    printf("%-8s %'6d %6.2f%%\n", flatview[i]->key, flatview[i]->value,
+           100.0 * flatview[i]->value / wordcnt);
 
   free(flatview);
   ht_free(ht);

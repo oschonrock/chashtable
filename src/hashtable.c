@@ -8,13 +8,14 @@
 
 // Creates a new HashTableItem
 static HashTableItem* ht_create_item(ht_key_t key, ht_value_t value) {
-  HashTableItem* item = calloc(1, sizeof *item);
+  HashTableItem* item = malloc(sizeof *item);
   if (!item) {
-    perror("calloc item");
+    perror("malloc item");
     exit(EXIT_FAILURE);
   }
   item->key   = strdup(key); // take a copy
   item->value = value;
+  item->next = NULL;
   return item;
 }
 
@@ -40,17 +41,18 @@ HashTable* ht_create(size_t size) {
   }
   size = next_pow2(size);
 
-  HashTable* table = calloc(1, sizeof *table);
+  HashTable* table = malloc(sizeof *table);
   if (!table) {
-    perror("calloc table");
+    perror("malloc table");
     exit(EXIT_FAILURE);
   }
-  table->size  = size;
-  table->slots = calloc(table->size, sizeof(HashTableItem*));
+  table->slots = calloc(size, sizeof(HashTableItem*));
   if (!table->slots) {
     perror("calloc slots");
     exit(EXIT_FAILURE);
   }
+  table->size      = size;
+  table->itemcount = 0;
   return table;
 }
 
@@ -120,15 +122,14 @@ void ht_insert(HashTable* table, ht_key_t key, ht_value_t value) {
   HashTableItem*  item = *slot;
   while (item) {
     if (strcmp(item->key, key) == 0) {
-      // exists, update value, free old value if needed
-      item->value = value;
+      item->value = value; // update value, free old value if needed
       return;
     }
     slot = &item->next;
     item = *slot;
   }
   *slot = ht_create_item(key, value); // new entry
-  ht_grow(table);                     // HashTable accounting
+  ht_grow(table);                     // dynamic resizing
 }
 
 // increments the value for a key or inserts with value = 1
@@ -145,7 +146,7 @@ void ht_inc(HashTable* table, ht_key_t key) {
     item = *slot;
   }
   *slot = ht_create_item(key, 1); // not found, init with one
-  ht_grow(table);                 // HashTable accounting
+  ht_grow(table);                 // dynamic resizing
 }
 
 // Deletes an item from the table
