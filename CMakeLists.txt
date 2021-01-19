@@ -5,9 +5,16 @@ set(CMAKE_C_COMPILER clang)
 project(projects)
 set(CMAKE_C_STANDARD 11) # C11 standard
 
+
+# defaults from cmake
+# -DCMAKE_BUILD_TYPE=Debug              adds           -g
+# -DCMAKE_BUILD_TYPE=MinSizeRel         adds       -Os    -DNDEBUG
+# -DCMAKE_BUILD_TYPE=RelWithDebInfo     adds       -O2 -g -DNDEBUG
+# -DCMAKE_BUILD_TYPE=Release            adds       -O3    -DNDEBUG
+
 # santiser
 set(CMAKE_C_FLAGS_DEBUG            -fsanitize=address,undefined)
-set(CMAKE_C_FLAGS_RELWITHDEBINFO   -fsanitize=address,undefined)
+# set(CMAKE_C_FLAGS_RELWITHDEBINFO   -fsanitize=address,undefined) // for use with valgrind instead
 
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
