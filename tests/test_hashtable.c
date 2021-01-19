@@ -35,10 +35,8 @@ void test_insert_delete(void) {
   ht_insert(ht, "bbb", 10); // @1 
   ht_insert(ht, "jjj", 10); // @1
   ht_insert(ht, "rrr", 10); // @1
-
   TEST_ASSERT_EQUAL(3, ht->itemcount);
-  ht_print(ht);
-  
+
   ht_delete(ht, "jjj");
   TEST_ASSERT_EQUAL(2, ht->itemcount);
   ht_delete(ht, "bbb");

@@ -58,8 +58,17 @@ int main() {
 
   // now sort that view and print the top 10
   qsort(flatview, ht->itemcount, sizeof(HashTableItem*), cmp_ht_items);
+  size_t wordcnt = 0;
+  size_t uniqcnt = 0;
+  for (size_t i = 0; i < ht->itemcount; i++) {
+    ++uniqcnt;
+    wordcnt += flatview[i]->value;
+  }
+  printf("\nWord count: %zu\nUnique count: %zu\n\n", wordcnt, uniqcnt);
+
+  puts("Top 10\n---------------");
   for (size_t i = 0; i < 10; i++)
-    printf("%s => %d\n", flatview[i]->key, flatview[i]->value);
+    printf("%-8s %6d\n", flatview[i]->key, flatview[i]->value);
 
   free(flatview);
   ht_free(ht);
