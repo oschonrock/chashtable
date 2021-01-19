@@ -10,8 +10,8 @@ void setUp(void) { ht = ht_create(4); }
 void tearDown(void) { ht_free(ht); }
 
 void test_pow2() {
-  TEST_ASSERT_EQUAL(0, next_pow2(0));
-  TEST_ASSERT_EQUAL(2, next_pow2(1));
+  TEST_ASSERT_EQUAL(1, next_pow2(0));
+  TEST_ASSERT_EQUAL(1, next_pow2(1));
   TEST_ASSERT_EQUAL(4, next_pow2(3));
   TEST_ASSERT_EQUAL(16, next_pow2(16));
   TEST_ASSERT_EQUAL(1024, next_pow2(768));

@@ -8,21 +8,28 @@
 
 // Creates a new HashTableItem
 static HashTableItem* ht_create_item(ht_key_t key, ht_value_t value) {
-  HashTableItem* item = malloc(sizeof *item);
+  HashTableItem* item = calloc(1, sizeof *item);
   if (!item) {
-    perror("malloc item");
+    perror("calloc item");
     exit(EXIT_FAILURE);
   }
   item->key   = strdup(key); // take a copy
   item->value = value;
-  item->next  = NULL;
   return item;
 }
 
-uint64_t next_pow2(uint64_t n) {
-  if (n == 0) return 0;
-  if (n == 1) return 2;
-  return (uint64_t)1 << (64 - __builtin_clzll(n - 1));
+static uint64_t next_pow2(uint64_t n) {
+  // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+  --n;
+  n |= n >> 1;
+  n |= n >> 2;
+  n |= n >> 4;
+  n |= n >> 8;
+  n |= n >> 16;
+  n |= n >> 32;
+  ++n;
+  n += (n == 0);
+  return n;
 }
 
 // Creates a new HashTable
@@ -31,16 +38,14 @@ HashTable* ht_create(size_t size) {
     fputs("ht_create(): size must be at least 4", stderr);
     exit(EXIT_FAILURE);
   }
-  next_pow2(size);
+  size = next_pow2(size);
 
-  HashTable* table = malloc(sizeof *table);
+  HashTable* table = calloc(1, sizeof *table);
   if (!table) {
-    perror("malloc table");
+    perror("calloc table");
     exit(EXIT_FAILURE);
   }
   table->size      = size;
-  table->scount    = 0;
-  table->itemcount = 0;
   table->slots     = calloc(table->size, sizeof(HashTableItem*));
   if (!table->slots) {
     perror("calloc slots");
@@ -79,7 +84,8 @@ void ht_free(HashTable* table) {
 static size_t ht_hash(size_t size, const char* str) {
   uint64_t hash = 0xcbf29ce484222325; // FNV_offset_basis
   while (*str) hash = (hash ^ (uint8_t)*str++) * 0x100000001b3; // FNV_prime
-  return hash % size;                                           // fit to table
+
+  return hash & (size - 1); // fit to table. we know size is power of 2
 }
 
 static void ht_grow(HashTable* table) {
@@ -210,9 +216,9 @@ void ht_print_search(HashTable* table, ht_key_t key) {
 // sorting. The start to array of pointers, length table->itemcount, is
 // returned.
 HashTableItem** ht_create_flat_view(HashTable* table) {
-  HashTableItem** itemview = malloc(table->itemcount * sizeof(HashTableItem*));
+  HashTableItem** itemview = calloc(table->itemcount, sizeof(HashTableItem*));
   if (!itemview) {
-    perror("malloc itemview");
+    perror("calloc itemview");
     exit(EXIT_FAILURE);
   }
   HashTableItem** curritem = itemview;
