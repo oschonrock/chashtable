@@ -1,4 +1,5 @@
 #include "hashtable.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -18,8 +19,20 @@ static HashTableItem* ht_create_item(ht_key_t key, ht_value_t value) {
   return item;
 }
 
+uint64_t next_pow2(uint64_t n) {
+  if (n == 0) return 0;
+  if (n == 1) return 2;
+  return (uint64_t)1 << (64 - __builtin_clzll(n - 1));
+}
+
 // Creates a new HashTable
 HashTable* ht_create(size_t size) {
+  if (size < 4) {
+    fputs("ht_create(): size must be at least 4", stderr);
+    exit(EXIT_FAILURE);
+  }
+  next_pow2(size);
+
   HashTable* table = malloc(sizeof *table);
   if (!table) {
     perror("malloc table");

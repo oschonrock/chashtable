@@ -1,4 +1,4 @@
-#include "hashtable.h"
+#include "hashtable.c"
 #include "unity.h"
 #include <string.h>
 #include <stdlib.h>
@@ -8,6 +8,16 @@ static HashTable *ht;
 void setUp(void) { ht = ht_create(4); }
 
 void tearDown(void) { ht_free(ht); }
+
+void test_pow2() {
+  TEST_ASSERT_EQUAL(0, next_pow2(0));
+  TEST_ASSERT_EQUAL(2, next_pow2(1));
+  TEST_ASSERT_EQUAL(4, next_pow2(3));
+  TEST_ASSERT_EQUAL(16, next_pow2(16));
+  TEST_ASSERT_EQUAL(1024, next_pow2(768));
+  TEST_ASSERT_EQUAL(1024, next_pow2(1023));
+  TEST_ASSERT_EQUAL(1024, next_pow2(1024));
+}
 
 void test_insert_delete(void) {
   TEST_ASSERT_EQUAL(0, ht->itemcount);
@@ -103,6 +113,7 @@ void test_flat_view() {
 
 int main() {
   UNITY_BEGIN();
+  RUN_TEST(test_pow2);
   RUN_TEST(test_insert_delete);
   RUN_TEST(test_inc);
   RUN_TEST(test_grow);
