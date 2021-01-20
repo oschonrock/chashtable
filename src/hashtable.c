@@ -15,7 +15,7 @@ static HashTableItem* ht_create_item(ht_key_t key, ht_value_t value) {
   }
   item->key   = strdup(key); // take a copy
   item->value = value;
-  item->next = NULL;
+  item->next  = NULL;
   return item;
 }
 
@@ -117,16 +117,26 @@ static void ht_grow(HashTable* table) {
 }
 
 // Inserts an item (or updates if exists)
-void ht_insert(HashTable* table, ht_key_t key, ht_value_t value) {
+static inline HashTableItem** ht_find_slot(HashTable* table, ht_key_t key) {
   HashTableItem** slot = &table->slots[ht_hash(table->size, key)];
   HashTableItem*  item = *slot;
   while (item) {
     if (strcmp(item->key, key) == 0) {
-      item->value = value; // update value, free old value if needed
-      return;
+      return slot;
     }
     slot = &item->next;
     item = *slot;
+  }
+  return slot;
+}
+
+// Inserts an item (or updates if exists)
+void ht_insert(HashTable* table, ht_key_t key, ht_value_t value) {
+  HashTableItem** slot = ht_find_slot(table, key);
+  HashTableItem*  item = *slot;
+  if (item) {
+    item->value = value; // update value, free old value if needed
+    return;
   }
   *slot = ht_create_item(key, value); // new entry
   ht_grow(table);                     // dynamic resizing
@@ -135,15 +145,11 @@ void ht_insert(HashTable* table, ht_key_t key, ht_value_t value) {
 // increments the value for a key or inserts with value = 1
 // specialised for ht_value_t=int and faster than search then update.
 void ht_inc(HashTable* table, ht_key_t key) {
-  HashTableItem** slot = &table->slots[ht_hash(table->size, key)];
+  HashTableItem** slot = ht_find_slot(table, key);
   HashTableItem*  item = *slot;
-  while (item) {
-    if (strcmp(item->key, key) == 0) {
-      ++item->value;
-      return;
-    }
-    slot = &item->next;
-    item = *slot;
+  if (item) {
+    ++item->value;
+    return;
   }
   *slot = ht_create_item(key, 1); // not found, init with one
   ht_grow(table);                 // dynamic resizing
@@ -151,27 +157,23 @@ void ht_inc(HashTable* table, ht_key_t key) {
 
 // Deletes an item from the table
 void ht_delete(HashTable* table, ht_key_t key) {
-  HashTableItem** slot = &table->slots[ht_hash(table->size, key)];
+  HashTableItem** slot = ht_find_slot(table, key);
   HashTableItem*  item = *slot;
-  while (item) {
-    if (strcmp(item->key, key) == 0) {
-      *slot = item->next; // remove item from linked list
-      ht_free_item(item);
-      --table->itemcount;
-      return;
-    }
-    slot = &item->next;
-    item = *slot;
+  if (item) {
+    *slot = item->next; // remove item from linked list
+    ht_free_item(item);
+    --table->itemcount;
+    return;
   }
 }
 
 // Searches the key in the hashtable
 // and returns NULL ptr if it doesn't exist
 HashTableItem* ht_get(HashTable* table, ht_key_t key) {
-  HashTableItem* item = table->slots[ht_hash(table->size, key)];
-  while (item) {
+  HashTableItem** slot = ht_find_slot(table, key);
+  HashTableItem*  item = *slot;
+  if (item) {
     if (strcmp(item->key, key) == 0) return item;
-    item = item->next;
   }
   return NULL;
 }

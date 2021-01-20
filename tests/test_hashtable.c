@@ -29,6 +29,7 @@ void test_insert_delete(void) {
   TEST_ASSERT_NOT_NULL(item);
   TEST_ASSERT_EQUAL(10, item->value);
   ht_delete(ht, "aaa");
+  TEST_ASSERT_NULL(ht_get(ht, "aaa"));
   TEST_ASSERT_EQUAL(0, ht->itemcount);
 
   
@@ -39,10 +40,13 @@ void test_insert_delete(void) {
 
   ht_delete(ht, "jjj");
   TEST_ASSERT_EQUAL(2, ht->itemcount);
+  TEST_ASSERT_NULL(ht_get(ht, "jjj"));
   ht_delete(ht, "bbb");
   TEST_ASSERT_EQUAL(1, ht->itemcount);
+  TEST_ASSERT_NULL(ht_get(ht, "bbb"));
   ht_delete(ht, "rrr");
   TEST_ASSERT_EQUAL(0, ht->itemcount);
+  TEST_ASSERT_NULL(ht_get(ht, "rrr"));
 
   HashTableItem* item2 = ht_get(ht, "aaa");
   TEST_ASSERT_NULL(item2);
