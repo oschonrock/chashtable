@@ -45,25 +45,15 @@ static void parse_and_map(FILE* fp, HashTable* table) {
   }
 }
 
-bool parse_long(const char* str, long* val) {
+bool parseul(const char* str, size_t* val) {
   char* end; // NOLINT
   errno = 0;
-  *val  = strtol(str, &end, 0);
+  *val  = strtoul(str, &end, 0);
   if (end == str || *end != '\0' || errno == ERANGE) return false;
   return true;
 }
 
-bool parse_int(const char* str, int* val) {
-  long long_val; // NOLINT
-  bool result = parse_long(str, &long_val);
-  if (result && long_val >= INT_MIN && long_val <= INT_MAX) {
-    *val = (int)long_val;
-    return true;
-  }
-  return false;
-}
-
-static inline size_t uminl(size_t a, size_t b) { return a < b ? a : b; }
+static inline size_t minul(size_t a, size_t b) { return a < b ? a : b; }
 
 int main(int argc, char** argv) {
   char usage[50];
@@ -77,9 +67,9 @@ int main(int argc, char** argv) {
     perror("fopen");
     exit(EXIT_FAILURE);
   }
-  long limit = 10;
+  size_t limit = 10;
   if (argc > 2) {
-    if (!parse_long(argv[2], &limit)) {
+    if (!parseul(argv[2], &limit)) {
       fputs(usage, stderr);
       fprintf(stderr, "Invalid `limit`: \"%s\"\n", argv[2]);
       fclose(fp);
@@ -104,7 +94,7 @@ int main(int argc, char** argv) {
   printf("%-17s %'10zu\n\n", "Unique count", ht->itemcount);
 
   printf("Top %zu\n----------------------------\n", limit);
-  for (size_t i = 0; i < uminl(limit, ht->itemcount); i++)
+  for (size_t i = 0; i < minul(limit, ht->itemcount); i++)
     printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value,
            100.0 * view[i]->value / wordcnt);
 
