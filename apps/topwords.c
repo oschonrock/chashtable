@@ -105,9 +105,6 @@ static void rand_ht_bench() {
   clock_gettime(CLOCK_MONOTONIC, &start);
   for (size_t i = 0; i < str_count; ++i) ht_inc(ht, strs[i]);
   clock_gettime(CLOCK_MONOTONIC, &stop);
-  char label[50];
-  snprintf(label, 50, "\nrand %'8zu x ht_inc()", str_count);
-  print_elapsed(start, stop, label);
   
   HashTableItem** view = ht_create_flat_view(ht);
   qsort(view, ht->itemcount, sizeof(HashTableItem*), cmp_ht_items);
@@ -117,9 +114,11 @@ static void rand_ht_bench() {
   printf("\n%s\n----------------------------\n", "rand bench test");
   printf("%-17s %'10zu\n", "Word count", wordcnt);
   printf("%-17s %'10zu\n", "Unique count", ht->itemcount);
-  printf("%-17s %'10zu\n\n", "Slot count", ht->size);
+  printf("%-17s %'10zu\n", "Slot count", ht->size);
 
-  printf("Top %zu\n----------------------------\n", limit);
+  print_elapsed(start, stop, "ht_inc()");
+  
+  printf("\nTop %zu\n----------------------------\n", limit);
   for (size_t i = 0; i < minul(limit, ht->itemcount); i++)
     printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value,
            100.0 * view[i]->value / wordcnt);
@@ -160,7 +159,6 @@ int main(int argc, char** argv) {
   clock_gettime(CLOCK_MONOTONIC, &start);
   parse_and_map(fp, ht);
   clock_gettime(CLOCK_MONOTONIC, &stop);
-
   fclose(fp);
 
   // build a flat view of the hashtable items
@@ -171,16 +169,13 @@ int main(int argc, char** argv) {
   size_t wordcnt = 0;
   for (size_t i = 0; i < ht->itemcount; i++) wordcnt += view[i]->value;
 
-  char label[50];
-  snprintf(label, 50, "\nrand %'8zu x [read + parse + ht_inc()]", wordcnt);
-  print_elapsed(start, stop, label);
-
   printf("\n%s\n----------------------------\n", argv[1]);
   printf("%-17s %'10zu\n", "Word count", wordcnt);
   printf("%-17s %'10zu\n", "Unique count", ht->itemcount);
-  printf("%-17s %'10zu\n\n", "Slot count", ht->size);
+  printf("%-17s %'10zu\n", "Slot count", ht->size);
+  print_elapsed(start, stop, "read + parse + ht_inc()");
 
-  printf("Top %zu\n----------------------------\n", limit);
+  printf("\nTop %zu\n----------------------------\n", limit);
   for (size_t i = 0; i < minul(limit, ht->itemcount); i++)
     printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value,
            100.0 * view[i]->value / wordcnt);

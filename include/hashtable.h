@@ -24,16 +24,16 @@ struct HashTable {
 HashTable* ht_create(size_t size);
 void       ht_free(HashTable* table);
 
-void ht_insert(HashTable* table, ht_key_t key, ht_value_t value);
-void ht_delete(HashTable* table, ht_key_t key);
+HashTableItem* ht_insert(HashTable* restrict table, ht_key_t key, ht_value_t value);
+void ht_delete(HashTable* restrict table, ht_key_t key);
 
-HashTableItem* ht_get(HashTable* table, ht_key_t key);
+HashTableItem* ht_get(HashTable* restrict table, ht_key_t key);
 
-HashTableItem* ht_get_or_create(HashTable* table, ht_key_t key,
+HashTableItem* ht_get_or_create(HashTable* restrict table, ht_key_t key,
                                 ht_value_t value);
 
-HashTableItem* ht_inc(HashTable* table, ht_key_t key);
+HashTableItem* ht_inc(HashTable* restrict table, ht_key_t key);
 
-void ht_print(HashTable* table);
+void ht_print(HashTable* restrict table);
 
-HashTableItem** ht_create_flat_view(HashTable* table);
+HashTableItem** ht_create_flat_view(HashTable* restrict table);

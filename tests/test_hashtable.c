@@ -22,10 +22,8 @@ void test_pow2() {
 void test_insert_delete(void) {
   TEST_ASSERT_EQUAL(0, ht->itemcount);
 
-  ht_insert(ht, "aaa", 10); // @2
+  HashTableItem* item = ht_insert(ht, "aaa", 10); // @2
   TEST_ASSERT_EQUAL(1, ht->itemcount);
-
-  HashTableItem* item = ht_get(ht, "aaa");
   TEST_ASSERT_NOT_NULL(item);
   TEST_ASSERT_EQUAL(10, item->value);
   ht_delete(ht, "aaa");
