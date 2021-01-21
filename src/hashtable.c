@@ -1,5 +1,4 @@
 #include "hashtable.h"
-#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -22,10 +21,7 @@ static uint64_t next_pow2(uint64_t n) {
 
 // Creates a new HashTable
 HashTable* ht_create(size_t size) {
-  if (size < 4) {
-    fputs("ht_create(): size must be at least 4", stderr);
-    exit(EXIT_FAILURE);
-  }
+  if (size < 4) size = 4;
   size = next_pow2(size); // always ensure power of 2
 
   HashTable* table = malloc(sizeof *table);
@@ -90,7 +86,8 @@ static size_t ht_hash(size_t size, const char* restrict str) {
   return hash & (size - 1); // fit to table. we know size is power of 2
 }
 
-static HashTableItem* ht_grow(HashTable* restrict table, HashTableItem* restrict old_item) {
+static HashTableItem* ht_grow(HashTable* restrict     table,
+                              HashTableItem* restrict old_item) {
   table->itemcount++;
   HashTableItem* new_item = old_item;
   if (table->itemcount * 100 / table->size >= 80) { // 80% load factor
@@ -120,7 +117,8 @@ static HashTableItem* ht_grow(HashTable* restrict table, HashTableItem* restrict
 }
 
 // Inserts an item (or updates if exists)
-static inline HashTableItem** ht_find_slot(HashTable* restrict table, ht_key_t key) {
+static inline HashTableItem** ht_find_slot(HashTable* restrict table,
+                                           ht_key_t            key) {
   HashTableItem** slot = &table->slots[ht_hash(table->size, key)];
   HashTableItem*  item = *slot;
   while (item) {
@@ -134,7 +132,8 @@ static inline HashTableItem** ht_find_slot(HashTable* restrict table, ht_key_t k
 }
 
 // Inserts an item (or updates if exists)
-HashTableItem* ht_insert(HashTable* restrict table, ht_key_t key, ht_value_t value) {
+HashTableItem* ht_insert(HashTable* restrict table, ht_key_t key,
+                         ht_value_t value) {
   HashTableItem** slot = ht_find_slot(table, key);
   HashTableItem*  item = *slot;
   if (item) {
@@ -142,7 +141,7 @@ HashTableItem* ht_insert(HashTable* restrict table, ht_key_t key, ht_value_t val
     return item;
   }
   *slot = ht_create_item(key, value); // new entry
-  return ht_grow(table, *slot);              // dynamic resizing
+  return ht_grow(table, *slot);       // dynamic resizing
 }
 
 // Deletes an item from the table
@@ -168,11 +167,8 @@ HashTableItem* ht_get(HashTable* restrict table, ht_key_t key) {
 HashTableItem* ht_get_or_create(HashTable* restrict table, ht_key_t key,
                                 ht_value_t value) {
   HashTableItem** slot = ht_find_slot(table, key);
-  HashTableItem*  item = *slot;
-  if (item) {
-    return item;
-  }
-  *slot = ht_create_item(key, value); // not found, init with one
+  if (*slot) return *slot;
+  *slot = ht_create_item(key, value); // not found, init with supplied value
   return ht_grow(table, *slot);       // dynamic resizing
 }
 
