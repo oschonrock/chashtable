@@ -35,7 +35,7 @@ int rand_range(int start, int end) {
 
 typedef struct timespec timespec;
 
-static void print_elapsed(timespec start, timespec end, char* label) {
+static double timediff(timespec start, timespec end) {
   timespec e;
   if ((end.tv_nsec - start.tv_nsec) < 0) {
     e.tv_sec  = end.tv_sec - start.tv_sec - 1;
@@ -44,7 +44,7 @@ static void print_elapsed(timespec start, timespec end, char* label) {
     e.tv_sec  = end.tv_sec - start.tv_sec;
     e.tv_nsec = end.tv_nsec - start.tv_nsec;
   }
-  printf("%s: %ld.%09lds\n", label, e.tv_sec, e.tv_nsec);
+  return e.tv_sec + e.tv_nsec / 1000000000.0;
 }
 
 static void parse_and_map(FILE* fp, size_t limit) {
@@ -92,7 +92,7 @@ static void parse_and_map(FILE* fp, size_t limit) {
   printf("%-17s %'10zu\n", "Word count", wordcnt);
   printf("%-17s %'10zu\n", "Unique count", ht->itemcount);
   printf("%-17s %'10zu\n", "Slot count", ht->size);
-  print_elapsed(start, stop, "read + parse + ht_inc()");
+  printf("read + parse + ht_inc(): %.9fs\n", timediff(start, stop));
 
   printf("\nTop %zu\n----------------------------\n", limit);
   for (size_t i = 0; i < minul(limit, ht->itemcount); i++)
@@ -145,8 +145,8 @@ static void rand_ht_bench(size_t limit) {
   printf("%-17s %'10zu\n", "Unique count", ht->itemcount);
   printf("%-17s %'10zu\n", "Slot count", ht->size);
 
-  print_elapsed(start, stop, "ht_inc()");
-  
+  printf("ht_inc(): %.9fs\n", timediff(start, stop));
+
   printf("\nTop %zu\n----------------------------\n", limit);
   for (size_t i = 0; i < minul(limit, ht->itemcount); i++)
     printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value,
