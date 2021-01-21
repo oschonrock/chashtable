@@ -90,9 +90,10 @@ static size_t ht_hash(size_t size, const char* str) {
   return hash & (size - 1); // fit to table. we know size is power of 2
 }
 
-static void ht_grow(HashTable* table) {
+static HashTableItem* ht_grow(HashTable* table, HashTableItem* old_item) {
   table->itemcount++;
-  if (table->itemcount * 100 / table->size >= 80) {
+  HashTableItem* new_item = old_item;
+  if (table->itemcount * 100 / table->size >= 80) { // 80% load factor
     size_t          nsize  = table->size * 2;
     HashTableItem** nslots = calloc(nsize, sizeof(HashTableItem*));
     if (!nslots) {
@@ -107,13 +108,15 @@ static void ht_grow(HashTable* table) {
         HashTableItem** nslot = &nslots[ht_hash(nsize, item->key)];
         item->next            = *nslot; // push into new list
         *nslot                = item;
-        item                  = next;
+        if (item == old_item) new_item = item;
+        item = next;
       }
     }
     free(table->slots);
     table->size  = nsize;
     table->slots = nslots;
   }
+  return new_item;
 }
 
 // Inserts an item (or updates if exists)
@@ -139,20 +142,7 @@ void ht_insert(HashTable* table, ht_key_t key, ht_value_t value) {
     return;
   }
   *slot = ht_create_item(key, value); // new entry
-  ht_grow(table);                     // dynamic resizing
-}
-
-// increments the value for a key or inserts with value = 1
-// specialised for ht_value_t=int and faster than search then update.
-void ht_inc(HashTable* table, ht_key_t key) {
-  HashTableItem** slot = ht_find_slot(table, key);
-  HashTableItem*  item = *slot;
-  if (item) {
-    ++item->value;
-    return;
-  }
-  *slot = ht_create_item(key, 1); // not found, init with one
-  ht_grow(table);                 // dynamic resizing
+  ht_grow(table, *slot);              // dynamic resizing
 }
 
 // Deletes an item from the table
@@ -172,10 +162,26 @@ void ht_delete(HashTable* table, ht_key_t key) {
 HashTableItem* ht_get(HashTable* table, ht_key_t key) {
   HashTableItem** slot = ht_find_slot(table, key);
   HashTableItem*  item = *slot;
+  return item;
+}
+
+// increments the value for a key or inserts with value = 1
+// specialised for ht_value_t=int and faster than search then update.
+HashTableItem* ht_get_or_create(HashTable* table, ht_key_t key,
+                                ht_value_t value) {
+  HashTableItem** slot = ht_find_slot(table, key);
+  HashTableItem*  item = *slot;
   if (item) {
-    if (strcmp(item->key, key) == 0) return item;
+    return item;
   }
-  return NULL;
+  *slot = ht_create_item(key, value); // not found, init with one
+  return ht_grow(table, *slot);       // dynamic resizing
+}
+
+HashTableItem* ht_inc(HashTable* table, ht_key_t key) {
+  HashTableItem* item = ht_get_or_create(table, key, 0);
+  item->value++;
+  return item;
 }
 
 // debug printing. customise printf format strings by key & value types

@@ -63,19 +63,16 @@ void test_inc(void) {
   TEST_ASSERT_EQUAL(3, ht->itemcount);
   TEST_ASSERT_EQUAL(4, ht->size);
 
-  HashTableItem* a = ht_get(ht, "aaa");
-  HashTableItem* b = ht_get(ht, "bbb");
-  HashTableItem* c = ht_get(ht, "ccc");
-
   ht_inc(ht, "aaa");
-  ht_inc(ht, "aaa");
+  HashTableItem* a = ht_inc(ht, "aaa");
   TEST_ASSERT_NOT_NULL(a);
   TEST_ASSERT_EQUAL(3, a->value);
 
-  ht_inc(ht, "bbb");
+  HashTableItem* b = ht_inc(ht, "bbb");
   TEST_ASSERT_NOT_NULL(b);
   TEST_ASSERT_EQUAL(2, b->value);
 
+  HashTableItem* c = ht_get(ht, "ccc");
   TEST_ASSERT_NOT_NULL(c);
   TEST_ASSERT_EQUAL(1, c->value);
 }

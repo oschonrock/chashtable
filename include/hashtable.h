@@ -25,10 +25,14 @@ HashTable* ht_create(size_t size);
 void       ht_free(HashTable* table);
 
 void ht_insert(HashTable* table, ht_key_t key, ht_value_t value);
-void ht_inc(HashTable* table, ht_key_t key);
 void ht_delete(HashTable* table, ht_key_t key);
 
 HashTableItem* ht_get(HashTable* table, ht_key_t key);
+
+HashTableItem* ht_get_or_create(HashTable* table, ht_key_t key,
+                                ht_value_t value);
+
+HashTableItem* ht_inc(HashTable* table, ht_key_t key);
 
 void ht_print(HashTable* table);
 
