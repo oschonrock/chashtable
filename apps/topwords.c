@@ -55,9 +55,9 @@ static void parse_and_map(FILE* fp, size_t limit) {
   char  word[WORDSIZE];
   char* word_ptr = word;
   while (!feof(fp) && !ferror(fp)) {
-    size_t bread  = fread(buf, 1, BUFSIZE, fp);
+    size_t bytes_read = fread(buf, 1, BUFSIZE, fp);
     char*  bufptr = buf;
-    while ((bufptr < buf + bread)) {
+    while ((bufptr < buf + bytes_read)) {
       char c = *bufptr;
       if (ht_is_alpha(c)) {
         *word_ptr++ = ht_tolower(c);

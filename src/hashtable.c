@@ -87,7 +87,7 @@ static size_t ht_hash(size_t size, const char* restrict str) {
 }
 
 HashTableItem* ht_rehash(HashTable* restrict table, size_t new_size,
-                                HashTableItem* restrict old_item) {
+                         HashTableItem* restrict old_item) {
   HashTableItem*  new_item = old_item;
   HashTableItem** nslots   = calloc(new_size, sizeof(HashTableItem*));
   if (!nslots) {
@@ -115,11 +115,15 @@ HashTableItem* ht_rehash(HashTable* restrict table, size_t new_size,
 static HashTableItem* ht_grow(HashTable* restrict table, HashTableItem* restrict old_item) {
   table->itemcount++;
   HashTableItem* new_item = old_item;
-  if (table->itemcount * 100 / table->size >= 80) { // 80% load factor
-    size_t nsize = table->size * 2;
-    new_item     = ht_rehash(table, nsize, old_item);
-  }
+  if (table->itemcount * 100 / table->size > 80)
+    new_item = ht_rehash(table, table->size * 2, old_item);
   return new_item;
+}
+
+static void ht_shrink(HashTable* restrict table) {
+  table->itemcount--;
+  if (table->size > 4 && table->itemcount * 100 / table->size < 20)
+    ht_rehash(table, table->size / 2, NULL); // no item to track
 }
 
 // Inserts an item (or updates if exists)
@@ -155,7 +159,7 @@ void ht_delete(HashTable* restrict table, ht_key_t key) {
   if (item) {
     *slot = item->next; // remove item from linked list
     ht_free_item(item);
-    --table->itemcount;
+    ht_shrink(table);
     return;
   }
 }

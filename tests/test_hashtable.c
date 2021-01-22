@@ -1,4 +1,5 @@
 #include "hashtable.c"
+#include "hashtable.h"
 #include "unity.h"
 #include <string.h>
 #include <stdlib.h>
@@ -75,13 +76,18 @@ void test_inc(void) {
   TEST_ASSERT_EQUAL(1, c->value);
 }
 
-void test_grow() {
+void test_grow_shrink() {
   ht_inc(ht, "aaa");
   ht_inc(ht, "bbb");
   ht_inc(ht, "ccc");
   ht_inc(ht, "ddd"); // grow on this one
   TEST_ASSERT_EQUAL(4, ht->itemcount);
   TEST_ASSERT_EQUAL(8, ht->size);
+  ht_delete(ht, "aaa");
+  ht_delete(ht, "bbb");
+  ht_delete(ht, "ccc");
+  TEST_ASSERT_EQUAL(1, ht->itemcount);
+  TEST_ASSERT_EQUAL(4, ht->size);
 }
 
 void test_flat_view() {
@@ -101,7 +107,7 @@ int main() {
   RUN_TEST(test_pow2);
   RUN_TEST(test_insert_delete);
   RUN_TEST(test_inc);
-  RUN_TEST(test_grow);
+  RUN_TEST(test_grow_shrink);
   RUN_TEST(test_flat_view);
   return UNITY_END();
 }
