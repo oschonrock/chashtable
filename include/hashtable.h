@@ -26,6 +26,7 @@ void       ht_free(HashTable* table);
 
 HashTableItem* ht_insert(HashTable* restrict table, ht_key_t key,
                          ht_value_t value);
+
 void           ht_delete(HashTable* restrict table, ht_key_t key);
 
 HashTableItem* ht_get(const HashTable* restrict table, ht_key_t key);
@@ -35,9 +36,23 @@ HashTableItem* ht_get_or_create(HashTable* restrict table, ht_key_t key,
 
 HashTableItem* ht_inc(HashTable* restrict table, ht_key_t key);
 
-void ht_print(const HashTable* restrict table);
-
 HashTableItem* ht_rehash(HashTable* restrict table, size_t new_size,
                          HashTableItem* restrict old_item);
 
 HashTableItem** ht_create_flat_view(const HashTable* restrict table);
+
+void ht_print(const HashTable* restrict table);
+
+
+
+typedef struct HashTableIterator HashTableIterator;
+struct HashTableIterator {
+  HashTable*     table;
+  HashTableItem* item;
+  size_t         slotidx;
+};
+
+HashTableIterator* ht_create_iter(HashTable* table);
+HashTableItem* ht_iter_reset(HashTableIterator* iter);
+HashTableItem* ht_iter_current(HashTableIterator* iter);
+HashTableItem* ht_iter_next(HashTableIterator* iter);

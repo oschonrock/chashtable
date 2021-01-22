@@ -104,6 +104,27 @@ void test_flat_view() {
   free(view);
 }
 
+void test_iter() {
+  char keys[3][5] = { "aaa", "bbb4", "ccc2" };
+  for (size_t i = 0; i < 3; ++i) ht_inc(ht, keys[i]);
+
+  HashTableIterator* iter = ht_create_iter(ht);
+  char keys2[3][5] = { "aaa", "ccc2" ,"bbb4" };
+  size_t i = 0;
+  while (ht_iter_current(iter)) {
+    TEST_ASSERT_EQUAL(0, strcmp(keys2[i], iter->item->key));
+    ht_iter_next(iter);
+    ++i;
+  }
+  ht_iter_reset(iter);
+  i = 0;
+  while (ht_iter_current(iter)) {
+    TEST_ASSERT_EQUAL(0, strcmp(keys2[i], iter->item->key));
+    ht_iter_next(iter);
+    ++i;
+  }
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_pow2);
@@ -111,5 +132,6 @@ int main() {
   RUN_TEST(test_inc);
   RUN_TEST(test_grow_shrink);
   RUN_TEST(test_flat_view);
+  RUN_TEST(test_iter);
   return UNITY_END();
 }

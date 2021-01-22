@@ -52,6 +52,59 @@ static HashTableItem* ht_create_item(ht_key_t key, ht_value_t value) {
   return item;
 }
 
+// Resets an iterator, finding the first item if it exists
+HashTableItem* ht_iter_reset(HashTableIterator* iter) {
+  iter->item = NULL;
+  iter->slotidx = 0;
+  for (size_t i = 0; i < iter->table->size; ++i) {
+    HashTableItem* item = iter->table->slots[i];
+    if (item) {
+      iter->item = item;
+      iter->slotidx = i;
+      break;
+    }
+  }
+  return iter->item;
+}
+
+// Creates an iterator for a hashtable
+HashTableIterator* ht_create_iter(HashTable* table) {
+  HashTableIterator* iter = malloc(sizeof *iter);
+  if (!iter) {
+    perror("malloc iter");
+    exit(EXIT_FAILURE);
+  }
+  iter->table = table;
+  ht_iter_reset(iter);// find first item
+  return iter;
+}
+
+// Resets an iterator, finding the first item if it exists
+HashTableItem* ht_iter_current(HashTableIterator* iter) {
+  return iter->item;
+}
+
+// Resets an iterator, finding the first item if it exists
+HashTableItem* ht_iter_next(HashTableIterator* iter) {
+  if (!iter->item) return NULL;
+  if (iter->item->next) {
+    iter->item = iter->item->next;
+    return iter->item;
+  }
+  iter->slotidx++; // next slot
+  while (iter->slotidx < iter->table->size) {
+    HashTableItem* item = iter->table->slots[iter->slotidx];
+    if (item) {
+      iter->item = item;
+      return item;
+    }
+    iter->slotidx++; // next slot
+  }
+  iter->item = NULL;
+  iter->slotidx = 0;
+  return NULL;
+}
+
 // Frees an item depending on their types, if the key or value members
 // need freeing that needs to happen here too
 static inline void ht_free_item(HashTableItem* restrict item) {
