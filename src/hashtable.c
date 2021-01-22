@@ -80,7 +80,7 @@ void ht_free(HashTable* restrict table) {
 // an appropriate hash function for short strings is FNV-1a
 // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function#FNV-1a_hash
 static size_t ht_hash(size_t size, const char* restrict str) {
-  uint64_t hash = 0xcbf29ce484222325;                           // FNV_offset_basis
+  uint64_t hash = 0xcbf29ce484222325; // FNV_offset_basis
   while (*str) hash = (hash ^ (uint8_t)*str++) * 0x100000001b3; // FNV_prime
 
   return hash & (size - 1); // fit to table. we know size is power of 2
@@ -90,7 +90,7 @@ HashTableItem* ht_rehash(HashTable* restrict table, size_t new_size,
                          HashTableItem* restrict old_item) {
   if (new_size < 4) new_size = 4;
   new_size = next_pow2(new_size); // always ensure power of 2
-  
+
   HashTableItem*  new_item = old_item;
   HashTableItem** nslots   = calloc(new_size, sizeof(HashTableItem*));
   if (!nslots) {
@@ -115,7 +115,8 @@ HashTableItem* ht_rehash(HashTable* restrict table, size_t new_size,
   return new_item;
 }
 
-static HashTableItem* ht_grow(HashTable* restrict table, HashTableItem* restrict old_item) {
+static HashTableItem* ht_grow(HashTable* restrict     table,
+                              HashTableItem* restrict old_item) {
   table->itemcount++;
   HashTableItem* new_item = old_item;
   if (table->itemcount * 100 / table->size > 80)
@@ -130,7 +131,8 @@ static void ht_shrink(HashTable* restrict table) {
 }
 
 // Inserts an item (or updates if exists)
-static inline HashTableItem** ht_find_slot(const HashTable* restrict table, ht_key_t key) {
+static inline HashTableItem** ht_find_slot(const HashTable* restrict table,
+                                           ht_key_t                  key) {
   HashTableItem** slot = &table->slots[ht_hash(table->size, key)];
   HashTableItem*  item = *slot;
   while (item) {
@@ -144,7 +146,8 @@ static inline HashTableItem** ht_find_slot(const HashTable* restrict table, ht_k
 }
 
 // Inserts an item (or updates if exists)
-HashTableItem* ht_insert(HashTable* restrict table, ht_key_t key, ht_value_t value) {
+HashTableItem* ht_insert(HashTable* restrict table, ht_key_t key,
+                         ht_value_t value) {
   HashTableItem** slot = ht_find_slot(table, key);
   HashTableItem*  item = *slot;
   if (item) {
@@ -175,7 +178,8 @@ HashTableItem* ht_get(const HashTable* restrict table, ht_key_t key) {
 
 // increments the value for a key or inserts with value = 1
 // specialised for ht_value_t=int and faster than search then update.
-HashTableItem* ht_get_or_create(HashTable* restrict table, ht_key_t key, ht_value_t value) {
+HashTableItem* ht_get_or_create(HashTable* restrict table, ht_key_t key,
+                                ht_value_t value) {
   HashTableItem** slot = ht_find_slot(table, key);
   if (*slot) return *slot;
   *slot = ht_create_item(key, value); // not found, init with supplied value

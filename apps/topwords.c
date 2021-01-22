@@ -7,7 +7,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-static inline bool ht_is_alpha(char c) { return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); }
+static inline bool ht_is_alpha(char c) {
+  return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
 static inline char ht_tolower(char c) { return (c < 'a') ? c + 'a' - 'A' : c; }
 
 static int cmp_ht_items(const void* a, const void* b) {
@@ -27,7 +29,9 @@ bool parseul(const char* str, size_t* val) {
 
 static inline size_t minul(size_t a, size_t b) { return a < b ? a : b; }
 
-int rand_range(int start, int end) { return start + rand() / (RAND_MAX / (end - start + 1) + 1); }
+int rand_range(int start, int end) {
+  return start + rand() / (RAND_MAX / (end - start + 1) + 1);
+}
 
 typedef struct timespec timespec;
 
@@ -56,7 +60,7 @@ static void parse_and_map(FILE* fp, size_t limit) {
   char* word_ptr = word;
   while (!feof(fp) && !ferror(fp)) {
     size_t bytes_read = fread(buf, 1, BUFSIZE, fp);
-    char*  bufptr = buf;
+    char*  bufptr     = buf;
     while ((bufptr < buf + bytes_read)) {
       char c = *bufptr;
       if (ht_is_alpha(c)) {
@@ -92,7 +96,8 @@ static void parse_and_map(FILE* fp, size_t limit) {
 
   printf("\nTop %zu\n----------------------------\n", limit);
   for (size_t i = 0; i < minul(limit, ht->itemcount); i++)
-    printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value, 100.0 * view[i]->value / wordcnt);
+    printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value,
+           100.0 * view[i]->value / wordcnt);
 
   free(view);
   ht_free(ht);
@@ -117,7 +122,8 @@ static void rand_ht_bench(size_t limit) {
       perror("malloc str");
       exit(EXIT_FAILURE);
     }
-    for (size_t chr = 0; chr < length; ++chr) strs[s][chr] = (char)rand_range('A', 'Z');
+    for (size_t chr = 0; chr < length; ++chr)
+      strs[s][chr] = (char)rand_range('A', 'Z');
     strs[s][length] = '\0';
   }
 
@@ -142,7 +148,8 @@ static void rand_ht_bench(size_t limit) {
 
   printf("\nTop %zu\n----------------------------\n", limit);
   for (size_t i = 0; i < minul(limit, ht->itemcount); i++)
-    printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value, 100.0 * view[i]->value / wordcnt);
+    printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value,
+           100.0 * view[i]->value / wordcnt);
 
   free(view);
   ht_free(ht);

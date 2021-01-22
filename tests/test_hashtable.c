@@ -1,10 +1,10 @@
 #include "hashtable.c"
 #include "hashtable.h"
 #include "unity.h"
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-static HashTable *ht;
+static HashTable* ht;
 
 void setUp(void) { ht = ht_create(4); }
 
@@ -31,8 +31,7 @@ void test_insert_delete(void) {
   TEST_ASSERT_NULL(ht_get(ht, "aaa"));
   TEST_ASSERT_EQUAL(0, ht->itemcount);
 
-  
-  ht_insert(ht, "bbb", 10); // @1 
+  ht_insert(ht, "bbb", 10); // @1
   ht_insert(ht, "jjj", 10); // @1
   ht_insert(ht, "rrr", 10); // @1
   TEST_ASSERT_EQUAL(3, ht->itemcount);
@@ -80,7 +79,7 @@ void test_grow_shrink() {
   ht_inc(ht, "aaa");
   ht_inc(ht, "bbb");
   ht_inc(ht, "ccc");
-  ht_inc(ht, "ddd"); // > 80% => grow 
+  ht_inc(ht, "ddd"); // > 80% => grow
   TEST_ASSERT_EQUAL(4, ht->itemcount);
   TEST_ASSERT_EQUAL(8, ht->size);
   ht_delete(ht, "aaa");
@@ -98,7 +97,7 @@ void test_flat_view() {
   ht_inc(ht, "bbb");
   ht_inc(ht, "ccc2");
   HashTableItem** view = ht_create_flat_view(ht);
-  
+
   TEST_ASSERT_EQUAL(0, strcmp("bbb", view[0]->key));
   TEST_ASSERT_EQUAL(0, strcmp("aaa", view[1]->key));
   TEST_ASSERT_EQUAL(0, strcmp("ccc2", view[2]->key));
