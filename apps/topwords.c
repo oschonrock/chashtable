@@ -7,9 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-static inline bool ht_is_alpha(char c) {
-  return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-}
+static inline bool ht_is_alpha(char c) { return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); }
 static inline char ht_tolower(char c) { return (c < 'a') ? c + 'a' - 'A' : c; }
 
 static int cmp_ht_items(const void* a, const void* b) {
@@ -29,9 +27,7 @@ bool parseul(const char* str, size_t* val) {
 
 static inline size_t minul(size_t a, size_t b) { return a < b ? a : b; }
 
-int rand_range(int start, int end) {
-  return start + rand() / (RAND_MAX / (end - start + 1) + 1);
-}
+int rand_range(int start, int end) { return start + rand() / (RAND_MAX / (end - start + 1) + 1); }
 
 typedef struct timespec timespec;
 
@@ -52,7 +48,7 @@ static void parse_and_map(FILE* fp, size_t limit) {
 
   timespec start, stop;
   clock_gettime(CLOCK_MONOTONIC, &start);
-  
+
 #define BUFSIZE 1024
 #define WORDSIZE 50
   char  buf[BUFSIZE];
@@ -70,14 +66,14 @@ static void parse_and_map(FILE* fp, size_t limit) {
           exit(EXIT_FAILURE);
         }
       } else if (word_ptr > word) {
-        *word_ptr++ = '\0';  // terminate word
-        ht_inc(ht, word); // record (takes a copy)
-        word_ptr = word;     // restart new word
+        *word_ptr++ = '\0'; // terminate word
+        ht_inc(ht, word);   // record (takes a copy)
+        word_ptr = word;    // restart new word
       }
       ++bufptr; // next char from buf
     }
   }
-  
+
   clock_gettime(CLOCK_MONOTONIC, &stop);
 
   // build a flat view of the hashtable items
@@ -96,12 +92,10 @@ static void parse_and_map(FILE* fp, size_t limit) {
 
   printf("\nTop %zu\n----------------------------\n", limit);
   for (size_t i = 0; i < minul(limit, ht->itemcount); i++)
-    printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value,
-           100.0 * view[i]->value / wordcnt);
+    printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value, 100.0 * view[i]->value / wordcnt);
 
   free(view);
   ht_free(ht);
-
 }
 
 static void rand_ht_bench(size_t limit) {
@@ -123,8 +117,7 @@ static void rand_ht_bench(size_t limit) {
       perror("malloc str");
       exit(EXIT_FAILURE);
     }
-    for (size_t chr = 0; chr < length; ++chr)
-      strs[s][chr] = (char)rand_range('A', 'Z');
+    for (size_t chr = 0; chr < length; ++chr) strs[s][chr] = (char)rand_range('A', 'Z');
     strs[s][length] = '\0';
   }
 
@@ -134,7 +127,7 @@ static void rand_ht_bench(size_t limit) {
   clock_gettime(CLOCK_MONOTONIC, &start);
   for (size_t i = 0; i < str_count; ++i) ht_inc(ht, strs[i]);
   clock_gettime(CLOCK_MONOTONIC, &stop);
-  
+
   HashTableItem** view = ht_create_flat_view(ht);
   qsort(view, ht->itemcount, sizeof(HashTableItem*), cmp_ht_items);
   size_t wordcnt = 0;
@@ -149,8 +142,7 @@ static void rand_ht_bench(size_t limit) {
 
   printf("\nTop %zu\n----------------------------\n", limit);
   for (size_t i = 0; i < minul(limit, ht->itemcount); i++)
-    printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value,
-           100.0 * view[i]->value / wordcnt);
+    printf("%-13s %'6d %6.2f%%\n", view[i]->key, view[i]->value, 100.0 * view[i]->value / wordcnt);
 
   free(view);
   ht_free(ht);
@@ -183,6 +175,6 @@ int main(int argc, char** argv) {
 
   rand_ht_bench(limit);
   parse_and_map(fp, limit);
-  
+
   fclose(fp);
 }
