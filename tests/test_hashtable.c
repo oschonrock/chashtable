@@ -80,14 +80,17 @@ void test_grow_shrink() {
   ht_inc(ht, "aaa");
   ht_inc(ht, "bbb");
   ht_inc(ht, "ccc");
-  ht_inc(ht, "ddd"); // grow on this one
+  ht_inc(ht, "ddd"); // > 80% => grow 
   TEST_ASSERT_EQUAL(4, ht->itemcount);
   TEST_ASSERT_EQUAL(8, ht->size);
   ht_delete(ht, "aaa");
   ht_delete(ht, "bbb");
-  ht_delete(ht, "ccc");
+  ht_delete(ht, "ccc"); // down to 12.5 => shrink
   TEST_ASSERT_EQUAL(1, ht->itemcount);
   TEST_ASSERT_EQUAL(4, ht->size);
+  ht_delete(ht, "ddd");
+  TEST_ASSERT_EQUAL(0, ht->itemcount);
+  TEST_ASSERT_EQUAL(4, ht->size); // min 4!
 }
 
 void test_flat_view() {

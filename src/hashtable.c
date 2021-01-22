@@ -88,6 +88,9 @@ static size_t ht_hash(size_t size, const char* restrict str) {
 
 HashTableItem* ht_rehash(HashTable* restrict table, size_t new_size,
                          HashTableItem* restrict old_item) {
+  if (new_size < 4) new_size = 4;
+  new_size = next_pow2(new_size); // always ensure power of 2
+  
   HashTableItem*  new_item = old_item;
   HashTableItem** nslots   = calloc(new_size, sizeof(HashTableItem*));
   if (!nslots) {
