@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static HashTable* ht;
+static hash_table* ht;
 
 void setUp(void) { ht = ht_create(4); }
 
@@ -23,7 +23,7 @@ void test_pow2() {
 void test_insert_delete(void) {
   TEST_ASSERT_EQUAL(0, ht->itemcount);
 
-  HashTableItem* item = ht_insert(ht, "aaa", 10); // @2
+  hash_table_item* item = ht_insert(ht, "aaa", 10); // @2
   TEST_ASSERT_EQUAL(1, ht->itemcount);
   TEST_ASSERT_NOT_NULL(item);
   TEST_ASSERT_EQUAL(10, item->value);
@@ -46,7 +46,7 @@ void test_insert_delete(void) {
   TEST_ASSERT_EQUAL(0, ht->itemcount);
   TEST_ASSERT_NULL(ht_get(ht, "rrr"));
 
-  HashTableItem* item2 = ht_get(ht, "aaa");
+  hash_table_item* item2 = ht_get(ht, "aaa");
   TEST_ASSERT_NULL(item2);
 }
 void test_inc(void) {
@@ -62,15 +62,15 @@ void test_inc(void) {
   TEST_ASSERT_EQUAL(4, ht->size);
 
   ht_inc(ht, "aaa");
-  HashTableItem* a = ht_inc(ht, "aaa");
+  hash_table_item* a = ht_inc(ht, "aaa");
   TEST_ASSERT_NOT_NULL(a);
   TEST_ASSERT_EQUAL(3, a->value);
 
-  HashTableItem* b = ht_inc(ht, "bbb");
+  hash_table_item* b = ht_inc(ht, "bbb");
   TEST_ASSERT_NOT_NULL(b);
   TEST_ASSERT_EQUAL(2, b->value);
 
-  HashTableItem* c = ht_get(ht, "ccc");
+  hash_table_item* c = ht_get(ht, "ccc");
   TEST_ASSERT_NOT_NULL(c);
   TEST_ASSERT_EQUAL(1, c->value);
 }
@@ -96,7 +96,7 @@ void test_flat_view() {
   ht_inc(ht, "aaa");
   ht_inc(ht, "bbb");
   ht_inc(ht, "ccc2");
-  HashTableItem** view = ht_create_flat_view(ht);
+  hash_table_item** view = ht_create_flat_view(ht);
 
   TEST_ASSERT_EQUAL(0, strcmp("bbb", view[0]->key));
   TEST_ASSERT_EQUAL(0, strcmp("aaa", view[1]->key));
@@ -108,7 +108,7 @@ void test_iter() {
   char keys[3][5] = { "aaa", "bbb4", "ccc2" };
   for (size_t i = 0; i < 3; ++i) ht_inc(ht, keys[i]);
 
-  HashTableIterator* iter = ht_create_iter(ht);
+  hash_table_iterator* iter        = ht_create_iter(ht);
   char keys2[3][5] = { "aaa", "ccc2" ,"bbb4" };
   size_t i = 0;
   while (ht_iter_current(iter)) {

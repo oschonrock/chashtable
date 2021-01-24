@@ -20,16 +20,16 @@ static uint64_t next_pow2(uint64_t n) {
 }
 
 // Creates a new HashTable
-HashTable* ht_create(size_t size) {
+hash_table* ht_create(size_t size) {
   if (size < 4) size = 4;
   size = next_pow2(size); // always ensure power of 2
 
-  HashTable* table = malloc(sizeof *table);
+  hash_table* table = malloc(sizeof *table);
   if (!table) {
     perror("malloc table");
     exit(EXIT_FAILURE);
   }
-  table->slots = calloc(size, sizeof(HashTableItem*));
+  table->slots = calloc(size, sizeof(hash_table_item*));
   if (!table->slots) {
     perror("calloc slots");
     exit(EXIT_FAILURE);
@@ -40,8 +40,8 @@ HashTable* ht_create(size_t size) {
 }
 
 // Creates a new HashTableItem
-static HashTableItem* ht_create_item(ht_key_t key, ht_value_t value) {
-  HashTableItem* item = malloc(sizeof *item);
+static hash_table_item* ht_create_item(ht_key_t key, ht_value_t value) {
+  hash_table_item* item = malloc(sizeof *item);
   if (!item) {
     perror("malloc item");
     exit(EXIT_FAILURE);
@@ -54,18 +54,18 @@ static HashTableItem* ht_create_item(ht_key_t key, ht_value_t value) {
 
 // Frees an item depending on their types, if the key or value members
 // need freeing that needs to happen here too
-static inline void ht_free_item(HashTableItem* restrict item) {
+static inline void ht_free_item(hash_table_item* restrict item) {
   free(item->key);
   free(item);
 }
 
 // Frees the whole hashtable
-void ht_free(HashTable* restrict table) {
+void ht_free(hash_table* restrict table) {
   // free the HashTableItems in the linked lists
   for (size_t i = 0; i < table->size; i++) {
-    HashTableItem* item = table->slots[i];
+    hash_table_item* item = table->slots[i];
     while (item) {
-      HashTableItem* next = item->next;
+      hash_table_item* next = item->next;
       ht_free_item(item);
       item = next;
     }
@@ -86,23 +86,23 @@ static size_t ht_hash(size_t size, const char* restrict str) {
   return hash & (size - 1); // fit to table. we know size is power of 2
 }
 
-HashTableItem* ht_rehash(HashTable* restrict table, size_t new_size,
-                         HashTableItem* restrict old_item) {
+hash_table_item* ht_rehash(hash_table* restrict table, size_t new_size,
+                           hash_table_item* restrict old_item) {
   if (new_size < 4) new_size = 4;
   new_size = next_pow2(new_size); // always ensure power of 2
 
-  HashTableItem*  new_item = old_item;
-  HashTableItem** nslots   = calloc(new_size, sizeof(HashTableItem*));
+  hash_table_item*  new_item = old_item;
+  hash_table_item** nslots   = calloc(new_size, sizeof(hash_table_item*));
   if (!nslots) {
     perror("calloc nslots");
     exit(EXIT_FAILURE);
   }
 
   for (size_t i = 0; i < table->size; i++) {
-    HashTableItem* item = table->slots[i];
+    hash_table_item* item = table->slots[i];
     while (item) {
-      HashTableItem*  next  = item->next; // save next
-      HashTableItem** nslot = &nslots[ht_hash(new_size, item->key)];
+      hash_table_item*  next  = item->next; // save next
+      hash_table_item** nslot = &nslots[ht_hash(new_size, item->key)];
       item->next            = *nslot; // push into new list
       *nslot                = item;
       if (item == old_item) new_item = item;
@@ -115,26 +115,26 @@ HashTableItem* ht_rehash(HashTable* restrict table, size_t new_size,
   return new_item;
 }
 
-static HashTableItem* ht_grow(HashTable* restrict     table,
-                              HashTableItem* restrict old_item) {
+static hash_table_item* ht_grow(hash_table* restrict      table,
+                                hash_table_item* restrict old_item) {
   table->itemcount++;
-  HashTableItem* new_item = old_item;
+  hash_table_item* new_item = old_item;
   if (table->itemcount * 100 / table->size > 80)
     new_item = ht_rehash(table, table->size * 2, old_item);
   return new_item;
 }
 
-static void ht_shrink(HashTable* restrict table) {
+static void ht_shrink(hash_table* restrict table) {
   table->itemcount--;
   if (table->size > 4 && table->itemcount * 100 / table->size < 20)
     ht_rehash(table, table->size / 2, NULL); // no item to track
 }
 
 // Inserts an item (or updates if exists)
-static inline HashTableItem** ht_find_slot(const HashTable* restrict table,
-                                           ht_key_t                  key) {
-  HashTableItem** slot = &table->slots[ht_hash(table->size, key)];
-  HashTableItem*  item = *slot;
+static inline hash_table_item** ht_find_slot(const hash_table* restrict table,
+                                             ht_key_t                   key) {
+  hash_table_item** slot = &table->slots[ht_hash(table->size, key)];
+  hash_table_item*  item = *slot;
   while (item) {
     if (strcmp(item->key, key) == 0) {
       return slot;
@@ -146,10 +146,10 @@ static inline HashTableItem** ht_find_slot(const HashTable* restrict table,
 }
 
 // Inserts an item (or updates if exists)
-HashTableItem* ht_insert(HashTable* restrict table, ht_key_t key,
-                         ht_value_t value) {
-  HashTableItem** slot = ht_find_slot(table, key);
-  HashTableItem*  item = *slot;
+hash_table_item* ht_insert(hash_table* restrict table, ht_key_t key,
+                           ht_value_t value) {
+  hash_table_item** slot = ht_find_slot(table, key);
+  hash_table_item*  item = *slot;
   if (item) {
     item->value = value; // update value, free old value if needed
     return item;
@@ -159,9 +159,9 @@ HashTableItem* ht_insert(HashTable* restrict table, ht_key_t key,
 }
 
 // Deletes an item from the table
-void ht_delete(HashTable* restrict table, ht_key_t key) {
-  HashTableItem** slot = ht_find_slot(table, key);
-  HashTableItem*  item = *slot;
+void ht_delete(hash_table* restrict table, ht_key_t key) {
+  hash_table_item** slot = ht_find_slot(table, key);
+  hash_table_item*  item = *slot;
   if (item) {
     *slot = item->next; // remove item from linked list
     ht_free_item(item);
@@ -172,32 +172,32 @@ void ht_delete(HashTable* restrict table, ht_key_t key) {
 
 // Searches the key in the hashtable
 // and returns NULL ptr if it doesn't exist
-HashTableItem* ht_get(const HashTable* restrict table, ht_key_t key) {
+hash_table_item* ht_get(const hash_table* restrict table, ht_key_t key) {
   return *ht_find_slot(table, key);
 }
 
 // increments the value for a key or inserts with value = 1
 // specialised for ht_value_t=int and faster than search then update.
-HashTableItem* ht_get_or_create(HashTable* restrict table, ht_key_t key,
-                                ht_value_t value) {
-  HashTableItem** slot = ht_find_slot(table, key);
+hash_table_item* ht_get_or_create(hash_table* restrict table, ht_key_t key,
+                                  ht_value_t value) {
+  hash_table_item** slot = ht_find_slot(table, key);
   if (*slot) return *slot;
   *slot = ht_create_item(key, value); // not found, init with supplied value
   return ht_grow(table, *slot);       // dynamic resizing
 }
 
-HashTableItem* ht_inc(HashTable* restrict table, ht_key_t key) {
-  HashTableItem* item = ht_get_or_create(table, key, 0);
+hash_table_item* ht_inc(hash_table* restrict table, ht_key_t key) {
+  hash_table_item* item = ht_get_or_create(table, key, 0);
   item->value++;
   return item;
 }
 
 // debug printing. customise printf format strings by key & value types
-void ht_print(const HashTable* restrict table) {
+void ht_print(const hash_table* restrict table) {
   printf("\n---- Hash Table ---\n");
   for (size_t i = 0; i < table->size; i++) {
     printf("@%zu: ", i);
-    HashTableItem* item = table->slots[i];
+    hash_table_item* item = table->slots[i];
     while (item) {
       printf("%s => %d | ", item->key, item->value);
       item = item->next;
@@ -210,15 +210,16 @@ void ht_print(const HashTable* restrict table) {
 // create a flat view (array) of HashTableItem pointers for iterating and/or
 // sorting. The start to array of pointers, length table->itemcount, is
 // returned.
-HashTableItem** ht_create_flat_view(const HashTable* restrict table) {
-  HashTableItem** itemview = calloc(table->itemcount, sizeof(HashTableItem*));
+hash_table_item** ht_create_flat_view(const hash_table* restrict table) {
+  hash_table_item** itemview =
+      calloc(table->itemcount, sizeof(hash_table_item*));
   if (!itemview) {
     perror("calloc itemview");
     exit(EXIT_FAILURE);
   }
-  HashTableItem** curritem = itemview;
+  hash_table_item** curritem = itemview;
   for (size_t i = 0; i < table->size; i++) {
-    HashTableItem* item = table->slots[i];
+    hash_table_item* item = table->slots[i];
     while (item) {
       *curritem++ = item;
       item        = item->next;
@@ -228,8 +229,8 @@ HashTableItem** ht_create_flat_view(const HashTable* restrict table) {
 }
 
 // Creates an iterator for a hashtable
-HashTableIterator* ht_create_iter(const HashTable* restrict table) {
-  HashTableIterator* iter = malloc(sizeof *iter);
+hash_table_iterator* ht_create_iter(const hash_table* restrict table) {
+  hash_table_iterator* iter = malloc(sizeof *iter);
   if (!iter) {
     perror("malloc iter");
     exit(EXIT_FAILURE);
@@ -240,11 +241,11 @@ HashTableIterator* ht_create_iter(const HashTable* restrict table) {
 }
 
 // Resets an iterator, finding the first item if it exists
-HashTableItem* ht_iter_reset(HashTableIterator* restrict iter) {
+hash_table_item* ht_iter_reset(hash_table_iterator* restrict iter) {
   iter->item = NULL;
   iter->slotidx = 0;
   for (size_t i = 0; i < iter->table->size; ++i) {
-    HashTableItem* item = iter->table->slots[i];
+    hash_table_item* item = iter->table->slots[i];
     if (item) {
       iter->item = item;
       iter->slotidx = i;
@@ -255,12 +256,12 @@ HashTableItem* ht_iter_reset(HashTableIterator* restrict iter) {
 }
 
 // Returns current item pointed to by iterator
-HashTableItem* ht_iter_current(HashTableIterator* restrict iter) {
+hash_table_item* ht_iter_current(hash_table_iterator* restrict iter) {
   return iter->item;
 }
 
 // Moves iterator to point at the next item
-HashTableItem* ht_iter_next(HashTableIterator* restrict iter) {
+hash_table_item* ht_iter_next(hash_table_iterator* restrict iter) {
   if (!iter->item) return NULL; // at end already
   
   if (iter->item->next) { // along linked list
@@ -269,7 +270,7 @@ HashTableItem* ht_iter_next(HashTableIterator* restrict iter) {
   }
   iter->slotidx++; // next slot
   while (iter->slotidx < iter->table->size) {
-    HashTableItem* item = iter->table->slots[iter->slotidx];
+    hash_table_item* item = iter->table->slots[iter->slotidx];
     if (item) {
       iter->item = item;
       return item;

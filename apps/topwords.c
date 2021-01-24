@@ -13,8 +13,8 @@ static inline bool ht_is_alpha(char c) {
 static inline char ht_tolower(char c) { return (c < 'a') ? c + 'a' - 'A' : c; }
 
 static int cmp_ht_items(const void* a, const void* b) {
-  int a_val = (*(HashTableItem**)a)->value;
-  int b_val = (*(HashTableItem**)b)->value;
+  int a_val = (*(hash_table_item**)a)->value;
+  int b_val = (*(hash_table_item**)b)->value;
   if (a_val == b_val) return 0;
   return a_val < b_val ? 1 : -1;
 }
@@ -48,7 +48,7 @@ static double timediff(timespec start, timespec end) {
 }
 
 static void parse_and_map(FILE* fp, size_t limit) {
-  HashTable* ht = ht_create(32 * 1024);
+  hash_table* ht = ht_create(32 * 1024);
 
   timespec start, stop;
   clock_gettime(CLOCK_MONOTONIC, &start);
@@ -81,10 +81,10 @@ static void parse_and_map(FILE* fp, size_t limit) {
   clock_gettime(CLOCK_MONOTONIC, &stop);
 
   // build a flat view of the hashtable items
-  HashTableItem** view = ht_create_flat_view(ht);
+  hash_table_item** view = ht_create_flat_view(ht);
 
   // now sort that view and print the top 10
-  qsort(view, ht->itemcount, sizeof(HashTableItem*), cmp_ht_items);
+  qsort(view, ht->itemcount, sizeof(hash_table_item*), cmp_ht_items);
   size_t wordcnt = 0;
   for (size_t i = 0; i < ht->itemcount; i++) wordcnt += view[i]->value;
 
@@ -127,15 +127,15 @@ static void rand_ht_bench(size_t limit) {
     strs[s][length] = '\0';
   }
 
-  HashTable* ht = ht_create(32 * 1024);
+  hash_table* ht = ht_create(32 * 1024);
 
   timespec start, stop;
   clock_gettime(CLOCK_MONOTONIC, &start);
   for (size_t i = 0; i < str_count; ++i) ht_inc(ht, strs[i]);
   clock_gettime(CLOCK_MONOTONIC, &stop);
 
-  HashTableItem** view = ht_create_flat_view(ht);
-  qsort(view, ht->itemcount, sizeof(HashTableItem*), cmp_ht_items);
+  hash_table_item** view = ht_create_flat_view(ht);
+  qsort(view, ht->itemcount, sizeof(hash_table_item*), cmp_ht_items);
   size_t wordcnt = 0;
   for (size_t i = 0; i < ht->itemcount; i++) wordcnt += view[i]->value;
 
