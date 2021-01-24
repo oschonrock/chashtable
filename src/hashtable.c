@@ -19,7 +19,7 @@ static uint64_t next_pow2(uint64_t n) {
   return n;
 }
 
-// Creates a new HashTable
+// Creates a new hash_table
 hash_table* ht_create(size_t size) {
   if (size < 4) size = 4;
   size = next_pow2(size); // always ensure power of 2
@@ -39,7 +39,7 @@ hash_table* ht_create(size_t size) {
   return table;
 }
 
-// Creates a new HashTableItem
+// Creates a new hash_table_item
 static hash_table_item* ht_create_item(ht_key_t key, ht_value_t value) {
   hash_table_item* item = malloc(sizeof *item);
   if (!item) {
@@ -61,7 +61,7 @@ static inline void ht_free_item(hash_table_item* restrict item) {
 
 // Frees the whole hashtable
 void ht_free(hash_table* restrict table) {
-  // free the HashTableItems in the linked lists
+  // free the hash_table_items in the linked lists
   for (size_t i = 0; i < table->size; i++) {
     hash_table_item* item = table->slots[i];
     while (item) {
@@ -70,7 +70,7 @@ void ht_free(hash_table* restrict table) {
       item = next;
     }
   }
-  // free the array of pointers to HashTableItems
+  // free the array of pointers to hash_table_items
   free(table->slots);
   free(table);
 }
@@ -218,7 +218,7 @@ void ht_print(const hash_table* restrict table) {
   printf("-------------------\n");
 }
 
-// create a flat view (array) of HashTableItem pointers for iterating and/or
+// create a flat view (array) of hash_table_item pointers for iterating and/or
 // sorting. The start to array of pointers, length table->itemcount, is
 // returned.
 hash_table_item** ht_create_flat_view(const hash_table* restrict table) {
