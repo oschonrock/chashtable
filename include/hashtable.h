@@ -47,12 +47,12 @@ void ht_print(const HashTable* restrict table);
 
 typedef struct HashTableIterator HashTableIterator;
 struct HashTableIterator {
-  HashTable*     table;
+  const HashTable*     table;
   HashTableItem* item;
   size_t         slotidx;
 };
 
-HashTableIterator* ht_create_iter(HashTable* table);
+HashTableIterator* ht_create_iter(const HashTable* restrict table);
 HashTableItem* ht_iter_reset(HashTableIterator* iter);
 HashTableItem* ht_iter_current(HashTableIterator* iter);
 HashTableItem* ht_iter_next(HashTableIterator* iter);
