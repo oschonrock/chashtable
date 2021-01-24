@@ -130,7 +130,12 @@ static void ht_shrink(hash_table* restrict table) {
     ht_rehash(table, table->size / 2, NULL); // no item to track
 }
 
-// Inserts an item (or updates if exists)
+// finds a slot for a key, either existing or new
+// "slot" here is defined as a "primary slot" in the hashtable
+// OR a ->next pointer in one of the items in the linked list
+// hanging off such a primary slot
+// this keeps the logic the same and allows reuse across insert,
+// delete, inc, dec and get
 static inline hash_table_item** ht_find_slot(const hash_table* restrict table,
                                              ht_key_t                   key) {
   hash_table_item** slot = &table->slots[ht_hash(table->size, key)];
@@ -189,6 +194,12 @@ hash_table_item* ht_get_or_create(hash_table* restrict table, ht_key_t key,
 hash_table_item* ht_inc(hash_table* restrict table, ht_key_t key) {
   hash_table_item* item = ht_get_or_create(table, key, 0);
   item->value++;
+  return item;
+}
+
+hash_table_item* ht_dec(hash_table* restrict table, ht_key_t key) {
+  hash_table_item* item = ht_get_or_create(table, key, 0);
+  item->value--;
   return item;
 }
 

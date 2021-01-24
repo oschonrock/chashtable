@@ -35,6 +35,7 @@ hash_table_item* ht_get_or_create(hash_table* restrict table, ht_key_t key,
                                   ht_value_t value);
 
 hash_table_item* ht_inc(hash_table* restrict table, ht_key_t key);
+hash_table_item* ht_dec(hash_table* restrict table, ht_key_t key);
 
 hash_table_item* ht_rehash(hash_table* restrict table, size_t new_size,
                            hash_table_item* restrict old_item);

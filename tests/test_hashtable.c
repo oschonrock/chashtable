@@ -75,6 +75,32 @@ void test_inc(void) {
   TEST_ASSERT_EQUAL(1, c->value);
 }
 
+void test_dec(void) {
+  ht_dec(ht, "aaa");
+  TEST_ASSERT_EQUAL(1, ht->itemcount);
+
+  ht_dec(ht, "bbb");
+  TEST_ASSERT_EQUAL(2, ht->itemcount);
+  TEST_ASSERT_EQUAL(4, ht->size);
+
+  ht_dec(ht, "ccc");
+  TEST_ASSERT_EQUAL(3, ht->itemcount);
+  TEST_ASSERT_EQUAL(4, ht->size);
+
+  ht_dec(ht, "aaa");
+  hash_table_item* a = ht_dec(ht, "aaa");
+  TEST_ASSERT_NOT_NULL(a);
+  TEST_ASSERT_EQUAL(-3, a->value);
+
+  hash_table_item* b = ht_dec(ht, "bbb");
+  TEST_ASSERT_NOT_NULL(b);
+  TEST_ASSERT_EQUAL(-2, b->value);
+
+  hash_table_item* c = ht_get(ht, "ccc");
+  TEST_ASSERT_NOT_NULL(c);
+  TEST_ASSERT_EQUAL(-1, c->value);
+}
+
 void test_grow_shrink() {
   ht_inc(ht, "aaa");
   ht_inc(ht, "bbb");
@@ -130,6 +156,7 @@ int main() {
   RUN_TEST(test_pow2);
   RUN_TEST(test_insert_delete);
   RUN_TEST(test_inc);
+  RUN_TEST(test_dec);
   RUN_TEST(test_grow_shrink);
   RUN_TEST(test_flat_view);
   RUN_TEST(test_iter);
