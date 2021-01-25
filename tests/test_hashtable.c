@@ -149,6 +149,7 @@ void test_iter() {
     ht_iter_next(iter);
     ++i;
   }
+  ht_free_iter(iter);
 }
 
 int main() {

@@ -251,6 +251,11 @@ hash_table_iterator* ht_create_iter(const hash_table* restrict table) {
   return iter;
 }
 
+// frees an iterator - not much to do, basic wrapper
+void ht_free_iter(hash_table_iterator* restrict iter) {
+  free(iter);
+}
+
 // Resets an iterator, finding the first item if it exists
 hash_table_item* ht_iter_reset(hash_table_iterator* restrict iter) {
   iter->item = NULL;

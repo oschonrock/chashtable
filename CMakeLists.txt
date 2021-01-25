@@ -14,14 +14,13 @@ set(CMAKE_C_STANDARD 11) # C11 standard
 
 # santiser
 if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD") # FreeBSD hangs with sanitizer
-  set(CMAKE_C_FLAGS_DEBUG            -fsanitize=address,undefined)
+  set(CMAKE_C_FLAGS_DEBUG -fsanitize=address,undefined)
 
   # use this to detect unitialized memory
-  # set(CMAKE_C_FLAGS_DEBUG            -fsanitize=memory,undefined)
+  # set(CMAKE_C_FLAGS_DEBUG -fsanitize=memory,undefined)
 
-# set(CMAKE_C_FLAGS_RELWITHDEBINFO   -fsanitize=address,undefined) // for use with valgrind instead
+  # set(CMAKE_C_FLAGS_RELWITHDEBINFO   -fsanitize=memory,undefined) # for use with valgrind instead
 endif()  
-set(CMAKE_C_FLAGS_DEBUG            -fsanitize=address,undefined)
 
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
