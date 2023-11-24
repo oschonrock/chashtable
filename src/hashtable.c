@@ -52,7 +52,7 @@ static hash_table_item* ht_create_item(ht_key_t key, ht_value_t value) {
   return item;
 }
 
-// Frees an item depending on their types, if the key or value members
+// Frees an item. Depending on their types, if the key or value members
 // need freeing that needs to happen here too
 static inline void ht_free_item(hash_table_item* restrict item) {
   free(item->key);

@@ -29,7 +29,7 @@ bool parseul(const char* str, size_t* val) {
 
 static inline size_t minul(size_t a, size_t b) { return a < b ? a : b; }
 
-int rand_range(int start, int end) {
+static inline int rand_range(int start, int end) {
   return start + rand() / (RAND_MAX / (end - start + 1) + 1);
 }
 
