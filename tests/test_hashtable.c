@@ -10,7 +10,7 @@ void setUp(void) { ht = ht_create(4); }
 
 void tearDown(void) { ht_free(ht); }
 
-void test_pow2() {
+void test_pow2(void) {
   TEST_ASSERT_EQUAL(1, next_pow2(0));
   TEST_ASSERT_EQUAL(1, next_pow2(1));
   TEST_ASSERT_EQUAL(4, next_pow2(3));
@@ -101,7 +101,7 @@ void test_dec(void) {
   TEST_ASSERT_EQUAL(-1, c->value);
 }
 
-void test_grow_shrink() {
+void test_grow_shrink(void) {
   ht_inc(ht, "aaa");
   ht_inc(ht, "bbb");
   ht_inc(ht, "ccc");
@@ -118,7 +118,7 @@ void test_grow_shrink() {
   TEST_ASSERT_EQUAL(4, ht->size); // min 4!
 }
 
-void test_flat_view() {
+void test_flat_view(void) {
   ht_inc(ht, "aaa");
   ht_inc(ht, "bbb");
   ht_inc(ht, "ccc2");
@@ -130,7 +130,7 @@ void test_flat_view() {
   free(view);
 }
 
-void test_iter() {
+void test_iter(void) {
   char keys[3][5] = { "aaa", "bbb4", "ccc2" };
   for (size_t i = 0; i < 3; ++i) ht_inc(ht, keys[i]);
 
@@ -152,7 +152,7 @@ void test_iter() {
   ht_free_iter(iter);
 }
 
-int main() {
+int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_pow2);
   RUN_TEST(test_insert_delete);
